@@ -4,6 +4,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule as AppConfigModule } from './config/config.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { AgentsModule } from './agents/agents.module';
+import { CommissionsModule } from './commissions/commissions.module';
 
 @Module({
   imports: [
@@ -15,6 +18,9 @@ import { ConfigModule as AppConfigModule } from './config/config.module';
       }),
       inject: [ConfigService],
     }),
+    TransactionsModule,
+    AgentsModule,
+    CommissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
