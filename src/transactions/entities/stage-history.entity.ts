@@ -6,7 +6,7 @@ import { CurrentStageEnum } from "../enums/current-stage.enum";
  * -------------------------------------- */
 @Schema({ _id: false })
 export class StageHistory {
-  @Prop({ required: true, enum: CurrentStageEnum })
+  @Prop({ type: String, required: true, enum: CurrentStageEnum })
   stage: CurrentStageEnum;
 
   @Prop({ required: true, default: Date.now })

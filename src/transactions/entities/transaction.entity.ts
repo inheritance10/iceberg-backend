@@ -13,7 +13,7 @@ export class Transaction extends BaseSchema {
   @Prop({ required: true })
   propertyId: string;
 
-  @Prop({ required: true, enum: PropertyTypeEnum })
+  @Prop({ type: String, required: true, enum: PropertyTypeEnum })
   propertyType: PropertyTypeEnum;
 
   @Prop({ required: true, min: 0 })
@@ -26,6 +26,7 @@ export class Transaction extends BaseSchema {
   sellingAgentId: Types.ObjectId;
 
   @Prop({
+    type: String,
     required: true,
     enum: CurrentStageEnum,
     default: CurrentStageEnum.AGREEMENT,
@@ -41,9 +42,9 @@ export class Transaction extends BaseSchema {
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);
 
-// Soft delete için index ekle
+// Soft delete için index ekliyoruz
 TransactionSchema.index({ deletedAt: 1 });
 
-// Soft delete plugin'ini ekle
+// Soft delete plugin'ini uyguluyoruz
 import { softDeletePlugin } from '../../common/plugins/soft-delete.plugin';
 TransactionSchema.plugin(softDeletePlugin);

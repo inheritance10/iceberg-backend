@@ -17,5 +17,6 @@ import { StageValidationService } from './services/stage-validation.service';
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService, StageValidationService],
+  exports: [TransactionsService], // SimulationModule'de kullanmak için export et
 })
 export class TransactionsModule {}

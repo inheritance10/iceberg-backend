@@ -91,7 +91,11 @@ export class AlertingService {
     };
 
     // Winston logger'a yaz (Loki'ye gönderilecek)
-    this.logger.alert(alertMessage.message, alertMessage);
+    // warn level kullanıyoruz çünkü alert'ler kritik uyarılardır
+    this.logger.warn(alertMessage.message, {
+      ...alertMessage,
+      tags: ['alert', 'critical'],
+    });
 
     // Burada email, Slack, SMS gibi alert mekanizmaları eklenebilir
     // Örnek: await this.emailService.sendAlert(alertMessage);

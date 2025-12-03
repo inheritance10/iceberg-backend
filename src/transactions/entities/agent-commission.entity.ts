@@ -13,7 +13,7 @@ export class AgentCommission {
   @Prop({ required: true, min: 0 })
   amount: number;
 
-  @Prop({ required: true, enum: AgentRoleEnum })
+  @Prop({ type: String, required: true, enum: AgentRoleEnum })
   role: AgentRoleEnum;
 
   @Prop({ required: true, min: 0 })

@@ -8,6 +8,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { AgentsModule } from './agents/agents.module';
 import { CommissionsModule } from './commissions/commissions.module';
 import { CommonModule } from './common/common.module';
+import { SimulationModule } from './simulation/simulation.module';
 import { winstonConfig } from './common/logger/winston.config';
 
 @Module({
@@ -25,6 +26,7 @@ import { winstonConfig } from './common/logger/winston.config';
     TransactionsModule,
     AgentsModule,
     CommissionsModule,
+    SimulationModule, // Simülasyon modülü
   ],
   controllers: [AppController],
   providers: [AppService],
