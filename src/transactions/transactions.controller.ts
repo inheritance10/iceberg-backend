@@ -23,6 +23,8 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { UpdateTransactionStageDto } from './dto/update-transaction-stage.dto';
 import { TransactionQueryDto } from './dto/transaction-query.dto';
+import { AuditLog } from '../common/decorators/audit-log.decorator';
+import { AuditAction, AuditEntityType } from '../common/entities/audit-log.entity';
 
 @ApiTags('transactions')
 @Controller('transactions')
@@ -30,11 +32,12 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   /**
-   * Yeni bir işlem oluşturur
+   * Yeni bir işlem oluşturuyoruz.
    * POST /transactions
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditLog({ action: AuditAction.CREATE, entityType: AuditEntityType.TRANSACTION })
   @ApiOperation({ summary: 'Yeni bir işlem oluşturur' })
   @ApiResponse({
     status: 201,
@@ -94,6 +97,7 @@ export class TransactionsController {
    * PATCH /transactions/:id
    */
   @Patch(':id')
+  @AuditLog({ action: AuditAction.UPDATE, entityType: AuditEntityType.TRANSACTION })
   @ApiOperation({ summary: 'İşlem bilgilerini günceller (stage hariç)' })
   @ApiParam({ name: 'id', description: 'Transaction ID' })
   @ApiResponse({
@@ -117,6 +121,7 @@ export class TransactionsController {
    * PATCH /transactions/:id/stage
    */
   @Patch(':id/stage')
+  @AuditLog({ action: AuditAction.UPDATE, entityType: AuditEntityType.TRANSACTION })
   @ApiOperation({
     summary: 'İşlem aşamasını günceller',
     description: 'İşlemin stage\'ini günceller. Completed olduğunda komisyon otomatik hesaplanır.',
@@ -174,6 +179,7 @@ export class TransactionsController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @AuditLog({ action: AuditAction.SOFT_DELETE, entityType: AuditEntityType.TRANSACTION })
   @ApiOperation({ summary: 'İşlemi siler' })
   @ApiParam({ name: 'id', description: 'Transaction ID' })
   @ApiResponse({

@@ -19,6 +19,8 @@ import {
 import { AgentsService } from './agents.service';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { UpdateAgentDto } from './dto/update-agent.dto';
+import { AuditLog } from '../common/decorators/audit-log.decorator';
+import { AuditAction, AuditEntityType } from '../common/entities/audit-log.entity';
 
 @ApiTags('agents')
 @Controller('agents')
@@ -31,6 +33,7 @@ export class AgentsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @AuditLog({ action: AuditAction.CREATE, entityType: AuditEntityType.AGENT })
   @ApiOperation({ summary: 'Yeni bir acente oluşturur' })
   @ApiResponse({
     status: 201,
@@ -83,6 +86,7 @@ export class AgentsController {
    * PATCH /agents/:id
    */
   @Patch(':id')
+  @AuditLog({ action: AuditAction.UPDATE, entityType: AuditEntityType.AGENT })
   @ApiOperation({ summary: 'Acente bilgilerini günceller' })
   @ApiParam({ name: 'id', description: 'Acente ID' })
   @ApiResponse({
@@ -111,6 +115,7 @@ export class AgentsController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @AuditLog({ action: AuditAction.SOFT_DELETE, entityType: AuditEntityType.AGENT })
   @ApiOperation({ summary: 'Acenteyi siler' })
   @ApiParam({ name: 'id', description: 'Acente ID' })
   @ApiResponse({

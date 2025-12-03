@@ -1,12 +1,12 @@
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
-import * as DailyRotateFile from 'winston-daily-rotate-file';
+import DailyRotateFile from 'winston-daily-rotate-file';
 
 /**
  * Winston Logger Configuration
  * Günlük log dosyaları oluşturur ve rotate eder
  */
-export const winstonConfig = WinstonModule.createLogger({
+export const winstonConfig = WinstonModule.forRoot({
   transports: [
     // Console transport - Development için
     new winston.transports.Console({
