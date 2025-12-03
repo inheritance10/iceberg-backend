@@ -7,7 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Request } from 'express';
-import { Reflector } from '@nestjs/core';
+import { Reflector, ModuleRef } from '@nestjs/core';
 import { AuditService } from '../services/audit.service';
 import { AUDIT_LOG_KEY } from '../decorators/audit-log.decorator';
 import {
@@ -21,6 +21,7 @@ export class AuditInterceptor implements NestInterceptor {
   constructor(
     private readonly auditService: AuditService,
     private readonly reflector: Reflector,
+    private readonly moduleRef: ModuleRef,
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -54,17 +55,25 @@ export class AuditInterceptor implements NestInterceptor {
     const httpMethod = request.method;
     const endpoint = request.url;
 
-    // Before data - Update ve Delete için mevcut entity'yi al
-    let beforeData: Record<string, any> | undefined;
-
     // Entity ID'yi bul (parametrelerden veya body'den)
     const entityId = this.extractEntityId(request, auditOptions.entityType);
+
+    // Before data - Update ve Delete için mevcut entity'yi al
+    // Promise olarak başlat (async işlem)
+    const beforeDataPromise = this.getBeforeDataIfNeeded(
+      entityId,
+      auditOptions,
+      context,
+    );
 
     // Response'u yakala ve logla
     return next.handle().pipe(
       tap(async (response) => {
         const duration = Date.now() - startTime;
         const statusCode = context.switchToHttp().getResponse().statusCode;
+
+        // Before data'yı bekle
+        const beforeData = await beforeDataPromise;
 
         // After data - Response'dan entity'yi al
         const afterData = auditOptions.skipResponse
@@ -97,6 +106,9 @@ export class AuditInterceptor implements NestInterceptor {
       catchError(async (error) => {
         const duration = Date.now() - startTime;
         const statusCode = error.status || 500;
+
+        // Before data'yı bekle
+        const beforeData = await beforeDataPromise;
 
         // Hata durumunda da log kaydet
         await this.auditService.log({
@@ -161,6 +173,74 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     return undefined;
+  }
+
+  /**
+   * Update/Delete işlemleri için before data'yı alır (eğer gerekliyse)
+   */
+  private async getBeforeDataIfNeeded(
+    entityId: string | undefined,
+    auditOptions: {
+      action: AuditAction;
+      entityType: AuditEntityType;
+    },
+    context: ExecutionContext,
+  ): Promise<Record<string, any> | undefined> {
+    // Eğer entity ID yoksa veya before data gerekmiyorsa
+    if (
+      !entityId ||
+      !(
+        auditOptions.action === AuditAction.UPDATE ||
+        auditOptions.action === AuditAction.DELETE ||
+        auditOptions.action === AuditAction.SOFT_DELETE
+      )
+    ) {
+      return undefined;
+    }
+
+    try {
+      // Service'i al
+      const service = this.getServiceFromContext(
+        context,
+        auditOptions.entityType,
+      );
+      if (!service) {
+        return undefined;
+      }
+
+      // Service'den entity'yi al
+      const entity = await service.findOne(entityId);
+      if (!entity) {
+        return undefined;
+      }
+
+      // Entity'yi sanitize et ve döndür
+      return this.auditService.sanitizeEntity(entity);
+    } catch (error) {
+      // Hata durumunda undefined döndür (before data zorunlu değil)
+      return undefined;
+    }
+  }
+
+  /**
+   * Context'ten doğru service'i alır
+   */
+  private getServiceFromContext(
+    context: ExecutionContext,
+    entityType: AuditEntityType,
+  ): any {
+    try {
+      switch (entityType) {
+        case AuditEntityType.AGENT:
+          return this.moduleRef.get('AgentsService', { strict: false });
+        case AuditEntityType.TRANSACTION:
+          return this.moduleRef.get('TransactionsService', { strict: false });
+        default:
+          return null;
+      }
+    } catch (error) {
+      return null;
+    }
   }
 }
 

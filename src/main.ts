@@ -6,6 +6,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { AuditService } from './common/services/audit.service';
+import { ModuleRef } from '@nestjs/core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,7 +32,10 @@ async function bootstrap() {
   // Global Audit Interceptor
   const reflector = app.get(Reflector);
   const auditService = app.get(AuditService);
-  app.useGlobalInterceptors(new AuditInterceptor(auditService, reflector));
+  const moduleRef = app.get(ModuleRef);
+  app.useGlobalInterceptors(
+    new AuditInterceptor(auditService, reflector, moduleRef),
+  );
 
   // CORS
   app.enableCors();

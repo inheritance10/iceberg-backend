@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, Optional } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Inject } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import {
@@ -10,6 +9,7 @@ import {
   AuditAction,
   AuditEntityType,
 } from '../entities/audit-log.entity';
+import { AlertingService } from './alerting.service';
 
 export interface AuditLogData {
   action: AuditAction;
@@ -36,6 +36,7 @@ export class AuditService {
     @InjectModel(AuditLog.name)
     private auditLogModel: Model<AuditLogDocument>,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    @Optional() private readonly alertingService?: AlertingService,
   ) {}
 
   /**
@@ -53,6 +54,28 @@ export class AuditService {
         ...data,
         timestamp: new Date().toISOString(),
       });
+
+      // Alerting kontrolü (eğer alerting service varsa)
+      if (this.alertingService) {
+        await this.alertingService.checkAndAlert(
+          data.action,
+          data.entityType,
+          data.entityId,
+          {
+            ...data.metadata,
+            duration: data.duration,
+            statusCode: data.statusCode,
+          },
+        );
+
+        // Performans uyarısı
+        if (data.duration && data.duration > 5000) {
+          await this.alertingService.alertPerformance(
+            data.duration,
+            data.endpoint || 'unknown',
+          );
+        }
+      }
     } catch (error) {
       // Audit log kaydetme hatası - kritik hata, console'a yaz
       console.error('Failed to save audit log:', error);
@@ -60,6 +83,11 @@ export class AuditService {
         error: error.message,
         data,
       });
+
+      // Hata durumunda alert gönder
+      if (this.alertingService) {
+        await this.alertingService.alertError(error as Error, { data });
+      }
     }
   }
 

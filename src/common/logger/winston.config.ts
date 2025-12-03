@@ -1,13 +1,14 @@
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
+import { createLokiTransport } from './loki.config';
 
 /**
  * Winston Logger Configuration
  * Günlük log dosyaları oluşturur ve rotate eder
+ * Grafana Loki entegrasyonu opsiyonel olarak eklenebilir
  */
-export const winstonConfig = WinstonModule.forRoot({
-  transports: [
+const transports: winston.transport[] = [
     // Console transport - Development için
     new winston.transports.Console({
       format: winston.format.combine(
@@ -58,6 +59,15 @@ export const winstonConfig = WinstonModule.forRoot({
       maxSize: '20m',
       maxFiles: '90d', // 90 gün sakla (audit loglar daha uzun saklanır)
     }),
-  ],
+];
+
+// Grafana Loki transport'u ekle (eğer aktifse)
+const lokiTransport = createLokiTransport();
+if (lokiTransport) {
+  transports.push(lokiTransport);
+}
+
+export const winstonConfig = WinstonModule.forRoot({
+  transports,
 });
 
