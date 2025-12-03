@@ -3,7 +3,7 @@ import { AgentRoleEnum } from '../../transactions/enums/agent-role.enum';
 
 /**
  * Agent Commission Interface
- * Her bir acentenin komisyon bilgilerini temsil eder
+ * Her bir acentenin komisyon bilgilerini temsil edecek şekilde tasarladık.
  */
 export interface IAgentCommission {
   agentId: Types.ObjectId | string;
@@ -15,7 +15,7 @@ export interface IAgentCommission {
 /**
  * Commission Breakdown Interface
  * İşlem tamamlandığında hesaplanan komisyon dağılımını temsil eder
- * Bu interface, commissions service'inde kullanılır ve API response'larında tip güvenliği sağlar
+ * Bu interface, commissions service'inde kullanılır ve API response'larında tip güvenliği sağlarız
  */
 export interface ICommissionBreakdown {
   agencyAmount: number;
