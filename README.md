@@ -392,6 +392,10 @@ Railway, GitHub Container Registry'den Docker image'ları çekerek otomatik depl
 - API: https://iceberg-backend-production.up.railway.app
 - Swagger: https://iceberg-backend-production.up.railway.app/api
 - Health Check: https://iceberg-backend-production.up.railway.app/health
+- Grafana: https://grafana-production-5c1b.up.railway.app/
+
+username: admin
+password: security password
 
 
 ### Deployment İzleme
