@@ -22,9 +22,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          # Cache path düzeltildi - eğer hala hata verirse cache satırını kaldırın
-          cache: 'npm'
-          cache-dependency-path: './iceberg-backend/package-lock.json'
+          # Cache kaldırıldı - dependency install biraz daha yavaş olabilir ama hata vermez
 
       - name: Install dependencies
         working-directory: ./iceberg-backend
