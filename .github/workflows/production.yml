@@ -29,44 +29,37 @@ jobs:
           # Cache kaldırıldı - dependency install biraz daha yavaş olabilir ama hata vermez
 
       - name: Install dependencies
-        working-directory: ./iceberg-backend
         run: npm ci
 
       - name: Run linter
-        working-directory: ./iceberg-backend
         run: npm run lint
 
       - name: Run unit tests
-        working-directory: ./iceberg-backend
         run: npm run test:unit
 
       - name: Run integration tests
-        working-directory: ./iceberg-backend
         run: npm run test:integration
         env:
           NODE_ENV: test
 
       - name: Run e2e tests
-        working-directory: ./iceberg-backend
         run: npm run test:e2e
         env:
           NODE_ENV: test
         continue-on-error: true
 
       - name: Generate coverage report
-        working-directory: ./iceberg-backend
         run: npm run test:cov
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          directory: ./iceberg-backend/coverage
+          directory: ./coverage
           flags: production
           name: production-coverage
         continue-on-error: true
 
       - name: Check test coverage threshold
-        working-directory: ./iceberg-backend
         run: |
           COVERAGE=$(npm run test:cov 2>&1 | grep -oP 'All files\s+\|\s+\d+\.\d+%' | grep -oP '\d+\.\d+' | head -1)
           echo "Coverage: $COVERAGE%"
@@ -112,8 +105,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./iceberg-backend
-          file: ./iceberg-backend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

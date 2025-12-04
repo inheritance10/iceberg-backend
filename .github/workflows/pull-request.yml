@@ -25,25 +25,20 @@ jobs:
           # Cache kaldırıldı - dependency install biraz daha yavaş olabilir ama hata vermez
 
       - name: Install dependencies
-        working-directory: ./iceberg-backend
         run: npm ci
 
       - name: Run linter
-        working-directory: ./iceberg-backend
         run: npm run lint
 
       - name: Run unit tests
-        working-directory: ./iceberg-backend
         run: npm run test:unit
 
       - name: Run integration tests
-        working-directory: ./iceberg-backend
         run: npm run test:integration
         env:
           NODE_ENV: test
 
       - name: Check build
-        working-directory: ./iceberg-backend
         run: npm run build
 
       - name: Comment PR with test results
