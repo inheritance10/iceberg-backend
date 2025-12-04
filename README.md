@@ -1,98 +1,291 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Iceberg Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Emlak danışmanlık şirketi için işlem takip ve komisyon dağıtım sistemi. Bu sistem, mülk satış ve kiralama işlemlerinin yaşam döngüsünü takip eder, otomatik komisyon hesaplaması yapar ve detaylı audit logging sağlar.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Özellikler
 
-## Description
+- İşlem yaşam döngüsü yönetimi (Agreement → Earnest Money → Title Deed → Completed)
+- Otomatik komisyon hesaplama ve dağıtım
+- Acente yönetimi
+- Soft delete desteği
+- Kapsamlı audit logging
+- Grafana Loki entegrasyonu ile log monitoring
+- Swagger API dokümantasyonu
+- Unit, integration ve E2E testler
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Teknoloji Yığını
 
-## Project setup
+- **Framework**: NestJS 11
+- **Language**: TypeScript
+- **Database**: MongoDB Atlas (Mongoose ODM)
+- **Logging**: Winston + Grafana Loki
+- **Testing**: Jest
+- **API Documentation**: Swagger/OpenAPI
+
+## Gereksinimler
+
+- Node.js 20+ (LTS)
+- npm veya yarn
+- MongoDB Atlas hesabı (veya local MongoDB)
+- (Opsiyonel) Docker ve Docker Compose
+
+## Kurulum
+
+### 1. Projeyi Klonla
 
 ```bash
-$ npm install
+git clone <repository-url>
+cd iceberg-backend
 ```
 
-## Compile and run the project
+### 2. Bağımlılıkları Yükle
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+### 3. Environment Variables Ayarla
+
+Proje root dizininde `.env` dosyası oluştur:
+
+```env
+# Database Configuration
+# Railway için DATABASE_URI, lokal için MONGODB_URI kullanılabilir
+DATABASE_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname?retryWrites=true&w=majority
+# veya
+MONGODB_URI=mongodb://localhost:27017/iceberg
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Loki Configuration (Opsiyonel)
+LOKI_ENABLED=false
+LOKI_HOST=http://localhost:3100
+APP_NAME=iceberg-backend
+```
+
+### MongoDB Atlas Kurulumu
+
+1. [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) hesabı oluştur
+2. Yeni cluster oluştur (Free tier yeterli)
+3. Database Access'te kullanıcı oluştur (username/password)
+4. Network Access'te IP whitelist ekle (0.0.0.0/0 development için)
+5. Cluster'a tıkla → Connect → Connect your application
+6. Connection string'i kopyala ve `.env` dosyasına `DATABASE_URI` veya `MONGODB_URI` olarak ekle
+
+## Çalıştırma
+
+### Development Mode
 
 ```bash
-# unit tests
-$ npm run test
+npm run start:dev
+```
 
-# e2e tests
-$ npm run test:e2e
+Uygulama `http://localhost:3000` adresinde çalışacak.
 
-# test coverage
-$ npm run test:cov
+### Production Mode
+
+```bash
+# Build
+npm run build
+
+# Start
+npm run start:prod
+```
+
+### Docker ile Çalıştırma
+
+Tüm servisleri (Backend + Loki + Grafana) başlatmak için:
+
+```bash
+docker-compose up -d
+```
+
+Sadece backend'i başlatmak için:
+
+```bash
+docker-compose up -d backend
+```
+
+Logları izlemek için:
+
+```bash
+docker-compose logs -f backend
+```
+
+Servisleri durdurmak için:
+
+```bash
+docker-compose down
+```
+
+## Testler
+
+### Tüm Testleri Çalıştır
+
+```bash
+npm run test:all
+```
+
+### Unit Testler
+
+```bash
+npm run test:unit
+```
+
+### Integration Testler
+
+```bash
+npm run test:integration
+```
+
+### E2E Testler
+
+```bash
+npm run test:e2e
+```
+
+### Test Coverage
+
+```bash
+npm run test:cov
+```
+
+## API Dokümantasyonu
+
+Uygulama çalıştıktan sonra Swagger dokümantasyonuna erişebilirsin:
+
+```
+http://localhost:3000/api
+```
+
+## API Endpoints
+
+### Health Check
+
+```
+GET /health
+```
+
+### Agents
+
+```
+POST   /agents          # Yeni acente oluştur
+GET    /agents          # Acenteleri listele
+GET    /agents/:id      # Acente detayı
+PATCH  /agents/:id     # Acente güncelle
+DELETE /agents/:id     # Acente sil (soft delete)
+```
+
+### Transactions
+
+```
+POST   /transactions                    # Yeni işlem oluştur
+GET    /transactions                    # İşlemleri listele (filtreleme, sayfalama)
+GET    /transactions/:id                # İşlem detayı
+PATCH  /transactions/:id                # İşlem güncelle
+PATCH  /transactions/:id/stage          # İşlem aşaması güncelle
+DELETE /transactions/:id               # İşlem sil (soft delete)
+```
+
+### Simulation
+
+```
+POST   /simulation/run                 # Tek bir simülasyon senaryosu çalıştır
+POST   /simulation/run-all              # Tüm simülasyon senaryolarını çalıştır
+GET    /simulation/report               # Simülasyon raporu
 ```
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Railway'e Deploy
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+1. GitHub repository'yi Railway'e bağla
+2. Environment variables ekle:
+   - `DATABASE_URI`: MongoDB Atlas connection string
+   - `NODE_ENV=production`
+   - (Opsiyonel) `LOKI_ENABLED`, `LOKI_HOST`, `APP_NAME`
+3. Railway otomatik olarak `Dockerfile`'ı kullanarak deploy edecek
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+Detaylı bilgi için `RAILWAY_DEPLOYMENT.md` dosyasına bak.
+
+### Canlı API URL
+
+Deploy edildikten sonra Railway otomatik bir URL verecek:
+
+```
+https://your-app-name.railway.app
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Swagger dokümantasyonu:
 
-## Resources
+```
+https://your-app-name.railway.app/api
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Proje Yapısı
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```
+src/
+├── agents/              # Acente yönetimi modülü
+├── transactions/        # İşlem yönetimi modülü
+├── commissions/         # Komisyon hesaplama modülü
+├── common/              # Ortak servisler, interceptors, filters
+│   ├── services/       # AuditService, ValidationService, AlertingService
+│   ├── interceptors/   # AuditInterceptor, TransformInterceptor
+│   ├── filters/        # HttpExceptionFilter
+│   └── logger/         # Winston ve Loki konfigürasyonları
+├── config/             # Konfigürasyon modülleri
+├── simulation/         # Sistem simülasyon modülü
+└── main.ts             # Uygulama bootstrap
+```
 
-## Support
+## Logging ve Monitoring
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Log Dosyaları
 
-## Stay in touch
+Loglar `logs/` dizininde saklanır:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- `combined-YYYY-MM-DD.log`: Tüm loglar
+- `error-YYYY-MM-DD.log`: Sadece hatalar
+- `audit-YYYY-MM-DD.log`: Audit logları
 
-## License
+### Grafana Loki Entegrasyonu
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Loki entegrasyonu aktifse, loglar Grafana Loki'ye gönderilir. Grafana dashboard'unda logları görüntüleyebilir ve alertler oluşturabilirsin.
+
+Loki ve Grafana'yı başlatmak için:
+
+```bash
+docker-compose up -d loki grafana
+```
+
+Grafana: `http://localhost:3001` (admin/admin)
+
+## Sorun Giderme
+
+### MongoDB Bağlantı Hatası
+
+- MongoDB Atlas connection string'in doğru olduğundan emin ol
+- Network Access'te IP adresinin whitelist'te olduğunu kontrol et
+- Kullanıcı adı ve şifrenin doğru olduğunu kontrol et
+
+### Port Zaten Kullanılıyor
+
+```bash
+# Port'u değiştir
+PORT=3001 npm run start:dev
+
+# Veya kullanan process'i bul ve durdur
+lsof -ti:3000 | xargs kill
+```
+
+### Testler Çalışmıyor
+
+- MongoDB Memory Server'ın düzgün çalıştığından emin ol
+- `node_modules` ve `dist` klasörlerini silip tekrar `npm install` yap
+
+## Lisans
+
+Bu proje özel bir projedir.

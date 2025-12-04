@@ -3,7 +3,7 @@ import LokiTransport from 'winston-loki';
 
 /**
  * Grafana Loki Transport Configuration
- * Log dosyalarını Grafana Loki'ye gönderir
+ * Log dosyalarını Grafana Loki'ye gönderir ve Grafana'da görüntülenebilir hale getirir.
  * 
  * Not: Bu transport opsiyoneldir, sadece Grafana Loki kuruluysa aktif olur
  * Environment variable ile kontrol edilir: LOKI_ENABLED=true
