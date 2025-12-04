@@ -191,18 +191,18 @@ export class TransactionsService {
       notes: updateStageDto.notes,
     };
 
-    // Stage history'ye ekle
+    // Stage history'ye ekliyoruz.
     const updatedStageHistory = [...transaction.stageHistory, newStageHistory];
 
-    // Eğer completed olduysa, komisyon hesapla
+    // Eğer completed olduysa, komisyon hesaplanıyor.
     let commissionBreakdown = transaction.commissionBreakdown;
     if (this.stageValidationService.isCompleted(updateStageDto.stage)) {
       commissionBreakdown = this.commissionsService.calculateCommission(
         transaction,
-      ) as any; // Mongoose schema'ya uygun hale getir
+      ) as any; // Mongoose schema'ya uygun hale getiriyoruz.
     }
 
-    // Transaction'ı güncelle
+    // Transaction'ı güncelliyoruz.
     const updatedTransaction = await this.transactionModel
       .findByIdAndUpdate(
         id,
@@ -237,7 +237,7 @@ export class TransactionsService {
       );
     }
 
-    // Eğer commissionBreakdown yoksa, hesapla ve kaydet
+    // Eğer commissionBreakdown yoksa, hesaplanıyor ve kaydediliyor.
     if (!transaction.commissionBreakdown) {
       const breakdown = this.commissionsService.calculateCommission(transaction);
       
@@ -248,7 +248,7 @@ export class TransactionsService {
       return breakdown;
     }
 
-    // Mevcut commissionBreakdown'ı interface formatına çevir
+    // Mevcut commissionBreakdown'ı interface formatına çeviriyoruz.
     return {
       agencyAmount: transaction.commissionBreakdown.agencyAmount,
       agents: transaction.commissionBreakdown.agents.map((agent) => ({
@@ -267,7 +267,7 @@ export class TransactionsService {
    * @throws NotFoundException - Transaction bulunamazsa
    */
   async remove(id: string): Promise<void> {
-    const transaction = await this.findOne(id); // Önce kontrol et
+    const transaction = await this.findOne(id); // Önce kontrol ediyoruz.
 
     await this.transactionModel.findByIdAndUpdate(id, {
       deletedAt: new Date(),
