@@ -32,8 +32,8 @@ Her modül standart NestJS katman yapısını takip eder:
 
 1. **Controller Layer**: HTTP isteklerini karşılar, DTO validation yapar, response döner
 2. **Service Layer**: Business logic'i içerir, veritabanı işlemlerini yönetir
-3. **Entity Layer**: Mongoose schema tanımlamaları, veri modeli
-4. **DTO Layer**: Data Transfer Objects, validation kuralları
+3. **Entity Layer**: Mongoose schema tanımlamaları yapılır ve veri modelimizi temsil eder.
+4. **DTO Layer**: Data Transfer Objects, validation kurallarını barındırır
 
 #### Neden Bu Yapı?
 
@@ -124,7 +124,7 @@ Transaction collection, işlem yaşam döngüsünü ve finansal bilgileri tutar:
 
 2. **Minimal Fields**: Şu an için sadece temel bilgiler:
    - Gelecekte genişletilebilir (address, commission rate, vb.)
-   - YAGNI prensibi uygulandı
+   - YAGNI prensibi uygulandı (İhtiyacımız olmayan geliştirmeyi yapmıyoruz.Nedeni gereksiz kod yazmamış oluyoruz çünkü gelecek olan özellik gerçekten bir ihtiyaç mı bizim için bilmiyoruz.)
 
 #### AuditLog Collection
 
@@ -192,6 +192,8 @@ Transaction collection, işlem yaşam döngüsünü ve finansal bilgileri tutar:
 - Test edilebilirlik zor
 - Reusability eksik
 - Single Responsibility ihlali
+- Modüler yapımıza uyumsuzluk
+- DRY ihlali
 
 **Seçilen çözüm:** StageValidationService - ayrı service, test edilebilir, reusable
 
@@ -399,42 +401,13 @@ Stage geçişleri sıkı kurallara tabi:
 
 ## 4. Diagram: System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Client (Frontend)                      │
-└──────────────────────────┬────────────────────────────────────┘
-                           │ HTTP/REST
-                           │
-┌──────────────────────────▼────────────────────────────────────┐
-│                    NestJS Application                         │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              Global Interceptors                      │   │
-│  │  - ValidationPipe                                    │   │
-│  │  - TransformInterceptor                             │   │
-│  │  - AuditInterceptor                                 │   │
-│  │  - HttpExceptionFilter                              │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                                                               │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Agents     │  │ Transactions │  │ Commissions  │      │
-│  │   Module     │  │   Module     │  │   Module     │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-│                                                               │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              Common Module                            │   │
-│  │  - ValidationService                                 │   │
-│  │  - AuditService                                      │   │
-│  │  - AlertingService                                  │   │
-│  └──────────────────────────────────────────────────────┘   │
-└──────────────────────────┬────────────────────────────────────┘
-                           │
-        ┌──────────────────┼──────────────────┐
-        │                  │                  │
-┌───────▼──────┐  ┌────────▼────────┐  ┌─────▼──────┐
-│   MongoDB    │  │  Winston Logger  │  │   Loki     │
-│    Atlas     │  │  (File Logs)    │  │  (Grafana) │
-└──────────────┘  └──────────────────┘  └───────────┘
-```
+Sistem mimarisi diyagramı aşağıda gösterilmiştir. Detaylı diyagram için [draw.io](./diagrams/architecture.drawio) dosyasına bakabilirsiniz.
+
+![System Architecture](./diagrams/iceberg-architecture.drawio.png)
+
+**Not:** Diyagramı Draw.io'da oluşturduktan sonra:
+1. `diagrams/architecture.png` olarak PNG formatında export edin
+2. `diagrams/architecture.drawio` olarak Draw.io formatında kaydedin (düzenleme için)
 
 ## 5. Key Design Principles Applied
 
@@ -448,5 +421,5 @@ Stage geçişleri sıkı kurallara tabi:
 
 ## 6. Conclusion
 
-Bu tasarım, ölçeklenebilir, test edilebilir ve maintainable bir sistem sağlar. Modüler yapı sayesinde yeni özellikler kolayca eklenebilir, mevcut özellikler güvenle değiştirilebilir. Soft delete, audit logging ve comprehensive testing ile production-ready bir sistem oluşturulmuştur.
+Bu tasarım, ölçeklenebilir, test edilebilir ve maintainable bir sistem sağlar. Modüler yapı sayesinde yeni özellikler kolayca eklenebilir, mevcut özellikler güvenle değiştirilebilir. Soft delete, audit logging ve comprehensive testing ile production-ready bir sistem oluşturulmuştur.Her güncelleme sonrasında  devsecops yönetimi ile güvenli bir sistem oluşturmak amaçlanmıştır.
 
